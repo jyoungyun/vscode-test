@@ -3,6 +3,7 @@
   "displayName": "vscode-test",
   "description": "Release test for vscode",
   "version": "0.0.1",
+  "publisher": "JyoungYun",
   "engines": {
     "vscode": "^1.54.0"
   },
