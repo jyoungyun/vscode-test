@@ -10,7 +10,7 @@ on:
 
 jobs:
   publish-extension:
-    runs-on: code-default
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v2
