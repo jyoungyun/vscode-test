@@ -3,9 +3,6 @@ name: Publish extension
 on:
   workflow_dispatch:
     inputs:
-      tag:
-        description: 'Release tag (format: major.minor.patch)'
-        required: true
       prerelease:
         description: 'Identify the release as a prerelease (default: false)'
         type: boolean
@@ -15,30 +12,25 @@ jobs:
   publish-extension:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: 16
+      - run: |
+          node -p "require('./package.json').version"    
       - name: Install node packages
         run: |
           npm install
       - name: Install vsce tool
         run: |
           npm install -g vsce
-      - name: Publish vsix package (pre-release)
-        if: ${{ github.event.inputs.prerelease }}
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
-        run: |
-          vsce package --pre-release ${{ github.event.inputs.tag }}
-          vsce publish --pre-release -i *.vsix
       - name: Publish vsix package
-        if: ${{ !github.event.inputs.prerelease }}
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: |
-          vsce package ${{ github.event.inputs.tag }}
-          vsce publish -i *.vsix
+          option="$( ${{ github.event.inputs.prerelease == 'true' }} ? --pre-release : )"
+          vsce package ${option}
+          vsce publish ${option}
       - name: Upload vsix package
         uses: actions/upload-artifact@v3
         with:
