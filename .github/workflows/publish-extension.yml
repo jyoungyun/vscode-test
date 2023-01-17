@@ -34,8 +34,8 @@ jobs:
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: |
-          vsce package ${option}
-          vsce publish ${option} -i *.vsix
+          vsce package
+          vsce publish -i *.vsix
       - name: Upload vsix package
         uses: actions/upload-artifact@v3
         with:
