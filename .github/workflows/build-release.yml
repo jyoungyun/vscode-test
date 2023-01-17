@@ -139,6 +139,8 @@ jobs:
       - uses: actions/download-artifact@v3
         with:
           name: ${{ needs.create-vsce-package.outputs.package_name }}
+      - run: |
+          echo ${{ env.version_tag }}
       - name: Release
         id: create_release
         uses: actions/create-release@v1
