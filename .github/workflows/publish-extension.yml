@@ -27,7 +27,8 @@ jobs:
           npm install -g vsce
       - name: Publish vsix package
         run: |
-          vsce publish --no-git-tag-version ${{ github.event.inputs.tag }}
+          vsce publish --no-git-tag-version ${{ github.event.inputs.tag }} \
+          $( ${{ github.event.inputs.prerelease }} ? --pre-release : )
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
       - name: Upload vsix package
