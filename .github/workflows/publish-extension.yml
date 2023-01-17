@@ -25,12 +25,20 @@ jobs:
       - name: Install vsce tool
         run: |
           npm install -g vsce
-      - name: Publish vsix package
-        run: |
-          vsce publish --no-git-tag-version ${{ github.event.inputs.tag }} \
-          $( ${{ github.event.inputs.prerelease }} ? --pre-release : )
+      - name: Publish vsix package (pre-release)
+        if: ${{ github.event.inputs.prerelease }}
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          vsce package --pre-release ${{ github.event.inputs.tag }}
+          vsce publish --pre-release -i *.vsix
+      - name: Publish vsix package
+        if: ${{ !github.event.inputs.prerelease }}
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+        run: |
+          vsce package ${{ github.event.inputs.tag }}
+          vsce publish -i *.vsix
       - name: Upload vsix package
         uses: actions/upload-artifact@v3
         with:
