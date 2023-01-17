@@ -234,7 +234,7 @@ jobs:
           path: ./${{ steps.search_package.outputs.package_name }}
 
   release:
-    needs: create-vsce-package
+    needs: publish-vsce-package
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
