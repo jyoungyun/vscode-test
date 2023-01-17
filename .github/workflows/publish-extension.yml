@@ -30,7 +30,7 @@ jobs:
         run: |
           option="$( ${{ github.event.inputs.prerelease == 'true' }} ? --pre-release : )"
           vsce package ${option}
-          vsce publish ${option}
+          vsce publish ${option} -i *.vsix
       - name: Upload vsix package
         uses: actions/upload-artifact@v3
         with:
