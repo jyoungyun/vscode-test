@@ -28,7 +28,8 @@ jobs:
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: |
-          option="$( ${{ github.event.inputs.prerelease == 'true' }} ? '--pre-release' : '')"
+          option="$( [[ ${{ github.event.inputs.prerelease }} == true ]] && echo '--pre-release' )"
+          echo $option
           vsce package ${option}
           vsce publish ${option} -i *.vsix
       - name: Upload vsix package
