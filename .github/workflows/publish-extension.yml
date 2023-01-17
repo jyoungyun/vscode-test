@@ -3,6 +3,9 @@ name: Publish extension
 on:
   workflow_dispatch:
     inputs:
+      tag:
+        description: 'Release tag (format: major.minor.patch)'
+        required: true
       prerelease:
         description: 'Identify the release as a prerelease (default: false)'
         type: boolean
@@ -24,7 +27,7 @@ jobs:
           npm install -g vsce
       - name: Publish vsix package
         run: |
-          vsce publish
+          vsce publish --no-git-tag-version ${{ github.event.inputs.tag }}
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
       - name: Upload vsix package
