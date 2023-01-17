@@ -22,6 +22,8 @@ on:
 jobs:
   publish-extension:
     runs-on: ubuntu-latest
+    outputs:
+      package_name: ${{ steps.search_package.outputs.package_name }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
