@@ -1,0 +1,16 @@
+name: Nightly release
+
+on:
+  workflow_dispatch:
+    inputs:
+      prerelease:
+        description: 'Identify the release as a prerelease (default: false)'
+        type: boolean
+        default: false
+
+jobs:
+  publish-extension:
+    uses: ./.github/workflows/publish-extension.yml
+    with:
+      prerelease: ${{ github.event.inputs.prerelease }}
+    secrets: inherit

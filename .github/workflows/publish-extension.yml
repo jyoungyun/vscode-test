@@ -1,12 +1,21 @@
 name: Publish extension
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       prerelease:
         description: 'Identify the release as a prerelease (default: false)'
         type: boolean
         default: false
+      publish:
+        description: 'Publish extension to marketplace'
+        type: boolean
+        default: false
+    secrets:
+      VSCE_PAT:
+        description: 'Personal access token for VSCode'
+        type: string
+        required: true
 
 jobs:
   publish-extension:
@@ -22,19 +31,19 @@ jobs:
       - name: Install vsce tool
         run: |
           npm install -g vsce
-      - name: Publish vsix package (pre-release)
-        if: ${{ github.event.inputs.prerelease == 'true' }}
-        env:
-          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+      - name: Create vsix package (pre-release)
+        if: ${{ inputs.prerelease == 'true' }}
         run: |
           vsce package --pre-release
-          vsce publish --pre-release -i *.vsix
+      - name: Create vsix package
+        if: ${{ inputs.prerelease == 'false' }}
+        run: |
+          vsce package
       - name: Publish vsix package
-        if: ${{ github.event.inputs.prerelease == 'false' }}
+        if: ${{ inputs.publish == 'true' }}
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: |
-          vsce package
           vsce publish -i *.vsix
       - name: Upload vsix package
         uses: actions/upload-artifact@v3

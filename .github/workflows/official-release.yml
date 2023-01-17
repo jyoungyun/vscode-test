@@ -1,0 +1,140 @@
+name: Official release
+
+on:
+  workflow_dispatch:    # Allow manual triggers
+    inputs:
+      draft:
+        description: 'Create a draft (unpublished) release (default: false)'
+        type: boolean
+        default: false
+      prerelease:
+        description: 'Identify the release as a prerelease (default: false)'
+        type: boolean
+        default: false
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      version_tag: ${{ steps.get_version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+      - name: Get version tag
+        id: get_version
+        run: |
+          version=$( node -p "require('./package.json').version" )
+          echo "version=${version}" >> $GITHUB_OUTPUT
+
+  create-issue:
+    needs: prepare
+    runs-on: ubuntu-latest
+    # outputs:
+    #   issue_number: ${{ steps.create_issue.outputs.issue_number }}
+    steps:
+      - run: |
+          echo ${{ needs.prepare.outputs.version_tag }}
+      # - name: Create issue
+      #   id: create_issue
+      #   uses: actions/github-script@v6
+      #   with:
+      #     script: |
+      #       github.rest.issues.create({
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         title: `Release ${{ needs.prepare.outputs.version_tag }} version`,
+      #         body: `## Let's release ${{ needs.prepare.outputs.version_tag }} version`,
+      #         labels: ['release']
+      #       }).then(response => {
+      #         core.setOutput('issue_number', response.data.number);
+      #       })
+
+  # Same job with check-pr-tsc.yml
+  check-compile:
+    needs: create-issue
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      - run: npm install
+      - run: npm run compile
+      # - uses: actions/github-script@v6
+      #   if: ${{ success() }}
+      #   with:
+      #     script: |
+      #       github.rest.issues.createComment({
+      #         issue_number: ${{ needs.create-issue.outputs.issue_number }},
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         body: `:heavy_check_mark: Compile test passed`
+      #       })
+
+  # Same job with check-pr-test.yml
+  check-test:
+    needs: create-issue
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      - run: npm install
+      # - run: sudo apt install xvfb
+      # - run: DISPLAY=:44 xvfb-run --server-num 44 npm test ci
+      # - uses: actions/github-script@v6
+      #   if: ${{ success() }}
+      #   with:
+      #     script: |
+      #       github.rest.issues.createComment({
+      #         issue_number: ${{ needs.create-issue.outputs.issue_number }},
+      #         owner: context.repo.owner,
+      #         repo: context.repo.repo,
+      #         body: `:heavy_check_mark: Unit test passed`
+      #       })
+
+  publish-extension:
+    needs:
+      - check-compile
+      - check-test
+    uses: ./.github/workflows/publish-extension.yml
+    with:
+      prerelease: ${{ github.event.inputs.prerelease }}
+      publish: true
+    secrets: inherit
+
+  release:
+    needs:
+      - prepare
+      - publish-extension
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/download-artifact@v3
+        with:
+          name: ${{ needs.create-vsce-package.outputs.package_name }}
+      - run: |
+          echo ${{ needs.prepare.outputs.version_tag }}
+      - name: Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ needs.prepare.outputs.version_tag }}
+          release_name: Release ${{ needs.prepare.outputs.version_tag }}
+          body_path: ./infra/release/release_note.md
+          draft: ${{ github.event.inputs.draft }}
+          prerelease: ${{ github.event.inputs.prerelease }}
+      - name: Upload artifact
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./${{ needs.create-vsce-package.outputs.package_name }}
+          asset_name: ${{ needs.create-vsce-package.outputs.package_name }}
+          asset_content_type: application/vsix
