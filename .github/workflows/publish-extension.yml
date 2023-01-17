@@ -5,16 +5,14 @@ on:
     inputs:
       prerelease:
         description: 'Identify the release as a prerelease (default: false)'
-        type: boolean
+        type: string
         default: false
       publish:
         description: 'Publish extension to marketplace'
-        type: boolean
+        type: string
         default: false
     secrets:
       VSCE_PAT:
-        description: 'Personal access token for VSCode'
-        type: string
         required: true
 
 jobs:
