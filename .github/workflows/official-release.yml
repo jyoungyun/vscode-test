@@ -102,7 +102,7 @@ jobs:
       - check-test
     uses: ./.github/workflows/publish-extension.yml
     with:
-      prerelease: ${{ github.event.inputs.prerelease }}
+      prerelease: ${{ inputs.prerelease }}
       publish: ${{ !inputs.draft && !inputs.prerelease }}
     secrets: inherit
 

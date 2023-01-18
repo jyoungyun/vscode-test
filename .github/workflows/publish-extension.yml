@@ -5,11 +5,11 @@ on:
     inputs:
       prerelease:
         description: 'Identify the release as a prerelease (default: false)'
-        type: string
+        type: boolean
         default: false
       publish:
         description: 'Publish extension to marketplace'
-        type: string
+        type: boolean
         default: false
     secrets:
       VSCE_PAT:
@@ -36,11 +36,11 @@ jobs:
         run: |
           npm install -g vsce
       - name: Create vsix package (pre-release)
-        if: ${{ inputs.prerelease == 'true' }}
+        if: ${{ inputs.prerelease }}
         run: |
           vsce package --pre-release
       - name: Create vsix package
-        if: ${{ inputs.prerelease == 'false' }}
+        if: ${{ !inputs.prerelease }}
         run: |
           vsce package
       - id: search_package
@@ -48,7 +48,7 @@ jobs:
           fname=$(find . -name "*.vsix" | xargs -I {} basename {})
           echo "package_name=${fname}" >> $GITHUB_OUTPUT
       - name: Publish vsix package
-        if: ${{ inputs.publish == 'true' }}
+        if: ${{ inputs.publish }}
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
         run: |
