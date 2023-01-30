@@ -3,6 +3,13 @@ name: Publish extension
 on:
   workflow_call:
     inputs:
+      build_type:
+        description: 'Build type'
+        type: choice
+        default: 'official'
+        options:
+          - nightly
+          - official
       prerelease:
         description: 'Identify the release as a prerelease (default: false)'
         type: boolean
@@ -35,12 +42,18 @@ jobs:
       - name: Install vsce tool
         run: |
           npm install -g vsce
+      - name: Create vsix package (nightly release)
+        if: ${{ inputs.build_type == "nightly" }}
+        run: |
+          VER=$(npm pkg get version | tr -d '"')
+          SHA=$(git rev-parse --short HEAD)
+          vsce package --no-git-tag-version ${VER}-${SHA}
       - name: Create vsix package (pre-release)
-        if: ${{ inputs.prerelease }}
+        if: ${{ inputs.build_type == "official" && inputs.prerelease }}
         run: |
           vsce package --pre-release
       - name: Create vsix package
-        if: ${{ !inputs.prerelease }}
+        if: ${{ inputs.build_type == "official" && !inputs.prerelease }}
         run: |
           vsce package
       - id: search_package
