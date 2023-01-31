@@ -4,12 +4,9 @@ on:
   workflow_call:
     inputs:
       build_type:
-        description: 'Build type'
-        type: choice
+        description: 'Build type (nightly/official)'
+        type: string
         default: 'official'
-        options:
-          - nightly
-          - official
       prerelease:
         description: 'Identify the release as a prerelease (default: false)'
         type: boolean
