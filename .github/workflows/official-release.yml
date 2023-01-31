@@ -104,7 +104,7 @@ jobs:
     with:
       build_type: official
       prerelease: ${{ inputs.prerelease }}
-      publish: ${{ !inputs.draft && !inputs.prerelease }}
+      publish: ${{ !inputs.draft }}
     secrets: inherit
 
   release:
