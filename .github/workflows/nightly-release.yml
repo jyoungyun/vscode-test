@@ -10,5 +10,5 @@ jobs:
   publish-extension:
     uses: ./.github/workflows/publish-extension.yml
     with:
-      prerelease: true
+      build_type: nightly
     secrets: inherit
