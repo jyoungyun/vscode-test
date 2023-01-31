@@ -6,7 +6,7 @@ on:
       build_type:
         description: 'Build type (nightly/official)'
         type: string
-        default: 'official'
+        default: official
       prerelease:
         description: 'Identify the release as a prerelease (default: false)'
         type: boolean
@@ -40,17 +40,17 @@ jobs:
         run: |
           npm install -g vsce
       - name: Create vsix package (nightly release)
-        if: ${{ inputs.build_type == "nightly" }}
+        if: ${{ inputs.build_type == 'nightly' }}
         run: |
           VER=$(npm pkg get version | tr -d '"')
           SHA=$(git rev-parse --short HEAD)
           vsce package --no-git-tag-version ${VER}-${SHA}
       - name: Create vsix package (pre-release)
-        if: ${{ inputs.build_type == "official" && inputs.prerelease }}
+        if: ${{ inputs.build_type == 'official' && inputs.prerelease }}
         run: |
           vsce package --pre-release
       - name: Create vsix package
-        if: ${{ inputs.build_type == "official" && !inputs.prerelease }}
+        if: ${{ inputs.build_type == 'official' && !inputs.prerelease }}
         run: |
           vsce package
       - id: search_package
