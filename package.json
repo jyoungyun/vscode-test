@@ -2,7 +2,7 @@
   "name": "vscode-jy-test",
   "displayName": "vscode-test",
   "description": "Release test for vscode",
-  "version": "0.0.24",
+  "version": "0.0.25",
   "publisher": "JyoungYun",
   "engines": {
     "vscode": "^1.63.0"
